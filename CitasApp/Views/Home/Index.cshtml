@@ -1,8 +1,41 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mb-5">
+    <h1 class="display-5 fw-bold text-primary">Sistema de Citas Médicas</h1>
+    <p class="lead text-muted">Administra pacientes, médicos y citas desde un solo lugar.</p>
+</div>
+
+<div class="row g-4 justify-content-center">
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="card-body text-center p-4">
+                <div class="display-4 mb-3">&#128100;</div>
+                <h4 class="card-title fw-bold">Pacientes</h4>
+                <p class="card-text text-muted">Consulta, agrega y edita la información de los pacientes.</p>
+                <a asp-controller="Paciente" asp-action="Index" class="btn btn-primary mt-2">Ver Pacientes</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="card-body text-center p-4">
+                <div class="display-4 mb-3">&#127973;</div>
+                <h4 class="card-title fw-bold">Médicos</h4>
+                <p class="card-text text-muted">Administra el directorio de médicos y sus especialidades.</p>
+                <a asp-controller="Medico" asp-action="Index" class="btn btn-primary mt-2">Ver Médicos</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="card-body text-center p-4">
+                <div class="display-4 mb-3">&#128197;</div>
+                <h4 class="card-title fw-bold">Citas</h4>
+                <p class="card-text text-muted">Gestiona la agenda de citas médicas y su estado.</p>
+                <a asp-controller="Cita" asp-action="Index" class="btn btn-primary mt-2">Ver Citas</a>
+            </div>
+        </div>
+    </div>
 </div>

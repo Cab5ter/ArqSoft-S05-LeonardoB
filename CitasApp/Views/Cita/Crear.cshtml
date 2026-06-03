@@ -1,0 +1,70 @@
+@model CitasApp.Models.Cita
+@{
+    ViewData["Title"] = "Nueva Cita";
+    var pacientes = (List<CitasApp.Models.Paciente>)ViewBag.Pacientes;
+    var medicos = (List<CitasApp.Models.Medico>)ViewBag.Medicos;
+    var estados = (CitasApp.Models.EstadoCita[])ViewBag.Estados;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">+ Nueva Cita</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Crear" method="post">
+                    <div class="mb-3">
+                        <label asp-for="PacienteId" class="form-label fw-semibold">Paciente</label>
+                        <select asp-for="PacienteId" class="form-select">
+                            <option value="">-- Selecciona un paciente --</option>
+                            @foreach (var p in pacientes)
+                            {
+                                <option value="@p.Id">@p.Nombre @p.Apellido</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="MedicoId" class="form-label fw-semibold">Médico</label>
+                        <select asp-for="MedicoId" class="form-select">
+                            <option value="">-- Selecciona un médico --</option>
+                            @foreach (var m in medicos)
+                            {
+                                <option value="@m.Id">@m.NombreCompleto – @m.Especialidad</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Fecha" class="form-label fw-semibold"></label>
+                            <input asp-for="Fecha" type="date" class="form-control"
+                                   value="@Model.Fecha.ToString("yyyy-MM-dd")"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Hora" class="form-label fw-semibold"></label>
+                            <input asp-for="Hora" type="time" class="form-control"
+                                   value="@Model.Hora.ToString("HH:mm")"/>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Motivo" class="form-label fw-semibold"></label>
+                        <input asp-for="Motivo" class="form-control" placeholder="Motivo de la consulta"/>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Estado" class="form-label fw-semibold"></label>
+                        <select asp-for="Estado" class="form-select">
+                            @foreach (var e in estados)
+                            {
+                                <option value="@e">@e</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

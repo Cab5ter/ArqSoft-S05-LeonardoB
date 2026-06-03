@@ -1,33 +1,54 @@
 @model List<CitasApp.Models.Cita>
-
 @{
     var paciente = Model.FirstOrDefault()?.Paciente;
+    ViewData["Title"] = $"Citas de {paciente?.Nombre} {paciente?.Apellido}";
 }
 
-<h1>Citas de @paciente?.Nombre @paciente?.Apellido</h1>
-<table class="table table-bordered table-hover">
-    <thead class="table-dark">
-        <tr>
-            <th>Fecha</th>
-            <th>Hora</th>
-            <th>Paciente</th>
-            <th>Médico</th>
-            <th>Motivo</th>
-            <th>Estado</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in Model)
-        {
-            <tr>
-                <td>@c.Fecha.ToString("dd/MM/yyyy")</td>
-                <td>@c.Hora.ToString("HH:mm")</td>
-                <td>@c.Paciente?.Nombre @c.Paciente?.Apellido</td>
-                <td>@c.Medico?.NombreCompleto</td>
-                <td>@c.Motivo</td>
-                <td>@c.Estado</td>
-            </tr>
-        }
-    </tbody>
-</table>
-<a asp-controller="Paciente" asp-action="Index">← Volver a pacientes</a>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-primary mb-0">
+        &#128197; Citas de @paciente?.Nombre @paciente?.Apellido
+    </h2>
+    <a asp-controller="Paciente" asp-action="Index" class="btn btn-outline-secondary btn-sm">&#8592; Volver</a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-primary">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Médico</th>
+                    <th>Motivo</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td>@c.Fecha.ToString("dd/MM/yyyy")</td>
+                        <td>@c.Hora.ToString("HH:mm")</td>
+                        <td>@c.Medico?.NombreCompleto</td>
+                        <td>@c.Motivo</td>
+                        <td>
+                            @{
+                                var badgeClass = c.Estado switch
+                                {
+                                    CitasApp.Models.EstadoCita.Confirmada => "bg-success",
+                                    CitasApp.Models.EstadoCita.Cancelada => "bg-danger",
+                                    _ => "bg-warning text-dark"
+                                };
+                            }
+                            <span class="badge @badgeClass">@c.Estado</span>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-4">Este paciente no tiene citas.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

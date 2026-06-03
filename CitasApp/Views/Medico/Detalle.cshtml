@@ -1,6 +1,26 @@
 @model CitasApp.Models.Medico
+@{
+    ViewData["Title"] = Model.NombreCompleto;
+}
 
-<h1>@Model.NombreCompleto</h1>
-<p><strong>Especialidad:</strong> @Model.Especialidad</p>
-<p><strong>Número de licencia:</strong> @Model.NumeroLicencia</p>
-<a asp-action="Index">← Volver a la lista</a>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">&#127973; @Model.NombreCompleto</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Especialidad</dt>
+                    <dd class="col-sm-7">@Model.Especialidad</dd>
+                    <dt class="col-sm-5">Número de Licencia</dt>
+                    <dd class="col-sm-7"><code>@Model.NumeroLicencia</code></dd>
+                </dl>
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">&#8592; Volver</a>
+                <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">Editar</a>
+            </div>
+        </div>
+    </div>
+</div>
