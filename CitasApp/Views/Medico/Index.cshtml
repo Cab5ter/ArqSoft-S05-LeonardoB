@@ -1,0 +1,22 @@
+@model List<CitasApp.Models.Medico>
+
+<h1>Médicos</h1>
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Nombre completo</th>
+            <th>Especialidad</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>@m.NombreCompleto</td>
+                <td>@m.Especialidad</td>
+                <td><a asp-action="Detalle" asp-route-id="@m.Id">Ver detalle</a></td>
+            </tr>
+        }
+    </tbody>
+</table>

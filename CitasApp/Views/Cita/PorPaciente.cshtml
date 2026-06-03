@@ -1,6 +1,10 @@
 @model List<CitasApp.Models.Cita>
 
-<h1>Agenda de citas</h1>
+@{
+    var paciente = Model.FirstOrDefault()?.Paciente;
+}
+
+<h1>Citas de @paciente?.Nombre @paciente?.Apellido</h1>
 <table class="table table-bordered table-hover">
     <thead class="table-dark">
         <tr>
@@ -26,3 +30,4 @@
         }
     </tbody>
 </table>
+<a asp-controller="Paciente" asp-action="Index">← Volver a pacientes</a>
