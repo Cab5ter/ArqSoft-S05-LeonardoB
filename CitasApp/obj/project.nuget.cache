@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "kDn2NL0dyTg=",
+  "success": true,
+  "projectFilePath": "/home/cabster/RiderProjects/CitasApp/CitasApp/CitasApp.csproj",
+  "expectedPackageFiles": [
+    "/home/cabster/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.8/microsoft.aspnetcore.app.ref.10.0.8.nupkg.sha512"
+  ],
+  "logs": []
+}
