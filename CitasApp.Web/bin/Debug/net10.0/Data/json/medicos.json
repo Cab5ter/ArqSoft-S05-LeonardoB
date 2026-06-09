@@ -1,0 +1,34 @@
+[
+  {
+    "Id": 1,
+    "Nombre": "Dr. Carlos",
+    "Apellido": "Reyes",
+    "Especialidad": "Medicina General",
+    "NumeroLicencia": "MG-10421",
+    "NombreCompleto": "Dr. Carlos Reyes"
+  },
+  {
+    "Id": 2,
+    "Nombre": "Dra. Patricia",
+    "Apellido": "Vega",
+    "Especialidad": "Pediatr\u00EDa",
+    "NumeroLicencia": "PD-20835",
+    "NombreCompleto": "Dra. Patricia Vega"
+  },
+  {
+    "Id": 3,
+    "Nombre": "Dr. Roberto",
+    "Apellido": "S\u00E1nchez",
+    "Especialidad": "Cardiolog\u00EDa",
+    "NumeroLicencia": "CA-30117",
+    "NombreCompleto": "Dr. Roberto S\u00E1nchez"
+  },
+  {
+    "Id": 4,
+    "Nombre": "Dr. Yo",
+    "Apellido": "El guapo",
+    "Especialidad": "Experto en abortos",
+    "NumeroLicencia": "MG-10239",
+    "NombreCompleto": "Dr. Yo El guapo"
+  }
+]

@@ -1,0 +1,16 @@
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/obj/Debug/net10.0/CitasApp.Infrastructure.csproj.AssemblyReference.cache
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/obj/Debug/net10.0/CitasApp.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/obj/Debug/net10.0/CitasApp.Infrastructure.AssemblyInfoInputs.cache
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/obj/Debug/net10.0/CitasApp.Infrastructure.AssemblyInfo.cs
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/obj/Debug/net10.0/CitasApp.Infrastructure.csproj.CoreCompileInputs.cache
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/obj/Debug/net10.0/CitasApp.Infrastructure.sourcelink.json
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/bin/Debug/net10.0/CitasApp.Infrastructure.deps.json
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/bin/Debug/net10.0/CitasApp.Infrastructure.dll
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/bin/Debug/net10.0/CitasApp.Infrastructure.pdb
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/bin/Debug/net10.0/CitasApp.Domain.dll
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/bin/Debug/net10.0/CitasApp.Domain.pdb
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/obj/Debug/net10.0/CitasApp.758DF856.Up2Date
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/obj/Debug/net10.0/CitasApp.Infrastructure.dll
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/obj/Debug/net10.0/refint/CitasApp.Infrastructure.dll
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/obj/Debug/net10.0/CitasApp.Infrastructure.pdb
+/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/obj/Debug/net10.0/ref/CitasApp.Infrastructure.dll

@@ -1,0 +1,103 @@
+is_global = true
+build_property.TargetFramework = net10.0
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v10.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = CitasApp.Web
+build_property.RootNamespace = CitasApp.Web
+build_property.ProjectDir = /home/cabster/RiderProjects/CitasApp/CitasApp.Web/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = /home/cabster/RiderProjects/CitasApp/CitasApp.Web
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 10.0
+build_property.EnableCodeStyleSeverity = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Cita/Crear.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2l0YS9DcmVhci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Cita/Editar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2l0YS9FZGl0YXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Cita/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2l0YS9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Cita/index1.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2l0YS9pbmRleDEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Cita/PorPaciente.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2l0YS9Qb3JQYWNpZW50ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Medico/Crear.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWVkaWNvL0NyZWFyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Medico/Detalle.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWVkaWNvL0RldGFsbGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Medico/Editar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWVkaWNvL0VkaXRhci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Medico/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWVkaWNvL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Paciente/Crear.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGFjaWVudGUvQ3JlYXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Paciente/Detalle.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGFjaWVudGUvRGV0YWxsZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Paciente/Editar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGFjaWVudGUvRWRpdGFyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Paciente/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGFjaWVudGUvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-7fz5ctlvzf

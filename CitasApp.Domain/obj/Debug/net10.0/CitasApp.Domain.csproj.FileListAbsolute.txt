@@ -1,0 +1,12 @@
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/bin/Debug/net10.0/CitasApp.Domain.deps.json
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/bin/Debug/net10.0/CitasApp.Domain.dll
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/bin/Debug/net10.0/CitasApp.Domain.pdb
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/obj/Debug/net10.0/CitasApp.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/obj/Debug/net10.0/CitasApp.Domain.AssemblyInfoInputs.cache
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/obj/Debug/net10.0/CitasApp.Domain.AssemblyInfo.cs
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/obj/Debug/net10.0/CitasApp.Domain.csproj.CoreCompileInputs.cache
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/obj/Debug/net10.0/CitasApp.Domain.sourcelink.json
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/obj/Debug/net10.0/CitasApp.Domain.dll
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/obj/Debug/net10.0/refint/CitasApp.Domain.dll
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/obj/Debug/net10.0/CitasApp.Domain.pdb
+/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/obj/Debug/net10.0/ref/CitasApp.Domain.dll
