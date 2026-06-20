@@ -1,0 +1,23 @@
+[
+  {
+    "Id": 1,
+    "Nombre": "Ana",
+    "Apellido": "Garc\u00EDa",
+    "Email": "ana@mail.com",
+    "Telefono": "555-0001"
+  },
+  {
+    "Id": 2,
+    "Nombre": "Luis",
+    "Apellido": "Mart\u00EDnez",
+    "Email": "luis@mail.com",
+    "Telefono": "555-0002"
+  },
+  {
+    "Id": 3,
+    "Nombre": "Mar\u00EDa",
+    "Apellido": "L\u00F3pez",
+    "Email": "maria@mail.com",
+    "Telefono": "555-0003"
+  }
+]

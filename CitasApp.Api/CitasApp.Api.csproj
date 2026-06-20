@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+      <AllowMissingPrunePackageData>true</AllowMissingPrunePackageData>
+</PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1"/>
+    </ItemGroup>
+	
+    <ItemGroup>
+        <ProjectReference Include="../CitasApp.Application/CitasApp.Application.csproj" />
+        <ProjectReference Include="../CitasApp.Domain/CitasApp.Domain.csproj" />
+        <ProjectReference Include="../CitasApp.Infrastructure/CitasApp.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Update="data\*.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+</Project>
