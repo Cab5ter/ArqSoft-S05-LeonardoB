@@ -31,6 +31,100 @@ Sobre esta base se implementó:
 - Vistas Razor con Bootstrap y navegación global mediante navbar.
 - Persistencia en archivos JSON con `System.Text.Json`, con datos semilla (*seed*) cuando no existen archivos previos.
 
+## Patrones de diseño GoF implementados
+
+### Factory — `RepositoryFactory`
+
+Clase estática en `CitasApp.Infrastructure/Repositories/RepositoryFactory.cs` que centraliza la decisión de qué repositorio instanciar según el entorno de ejecución:
+
+- **`"Production"`** → `MemoriaPacienteRepository` (simula una base de datos SQL en memoria)
+- **Cualquier otro entorno** → `JsonPacienteRepository` (persistencia en archivo JSON)
+
+```csharp
+var repo = RepositoryFactory.CrearPacienteRepository(
+               builder.Environment.EnvironmentName, dataPath);
+```
+
+Esto desacopla al consumidor del repositorio concreto: cambiar de JSON a SQL solo requiere modificar la Factory, sin tocar ningún controlador.
+
+### Decorator — `LoggingPacienteRepository`
+
+Clase en `CitasApp.Infrastructure/Repositories/LoggingPacienteRepository.cs` que implementa `IPacienteRepository` y **envuelve** a otro repositorio real, añadiendo logging en consola antes y después de cada operación sin modificar el repositorio original.
+
+```
+IPacienteRepository
+    ↑ implementa
+LoggingPacienteRepository  →  delega a  →  JsonPacienteRepository
+```
+
+Al navegar a `/Paciente` se ve en la terminal:
+
+```
+[2026-06-24 09:54:28] ObtenerTodos — inicio
+[2026-06-24 09:54:28] ObtenerTodos — 3 registros
+```
+
+En `Program.cs` se conectan Factory y Decorator:
+
+```csharp
+builder.Services.AddScoped<IPacienteRepository>(sp =>
+{
+    var repo = RepositoryFactory.CrearPacienteRepository(entorno, dataPath);
+    return new LoggingPacienteRepository(repo);  // Decorator envuelve al repo
+});
+```
+
+### Observer — `CitaService` + `SmsObserver` + `EmailObserver`
+
+Sistema de notificaciones que se activa al confirmar una cita. Sigue el principio de que el **sujeto** (`CitaService`) no conoce a los observadores concretos — solo depende de la interfaz `ICitaObserver` definida en Domain.
+
+| Clase | Capa | Rol |
+|---|---|---|
+| `ICitaObserver` | Domain | Contrato: `Notificar(Cita cita, string evento)` |
+| `SmsObserver` | Infrastructure | Observador concreto — simula envío de SMS |
+| `EmailObserver` | Infrastructure | Observador concreto — simula envío de email |
+| `CitaService` | Application | **Sujeto** — mantiene la lista de observadores y notifica al confirmar |
+
+`CitaService` solo importa namespaces de Domain (`CitasApp.Interfaces`, `CitasApp.Models`), nunca de Infrastructure. Los observadores concretos se suscriben desde `Program.cs` (capa Web), que es el único punto donde convergen todas las capas:
+
+```csharp
+builder.Services.AddSingleton<CitaService>(sp =>
+{
+    var service = new CitaService();
+    service.Suscribir(new SmsObserver());    // Infrastructure
+    service.Suscribir(new EmailObserver());  // Infrastructure
+    return service;
+});
+```
+
+Al editar una cita y cambiar su estado a `Confirmada`, el controlador llama a `citaService.Confirmar(cita)` y aparece en la terminal:
+
+```
+[2026-06-24 10:12:48] [SMS]   Cita #1 confirmada | Paciente=1  Médico=1  Fecha=01/06/2026  Estado=Confirmada
+[2026-06-24 10:12:48] [EMAIL] Simulando envío → Cita #1 ha sido confirmada para el 01/06/2026 a las 09:00
+```
+
+## Preguntas de reflexión
+
+**¿Qué principio SOLID aplica el Decorator al no modificar `JsonPacienteRepository`?**
+El principio **Open/Closed (OCP)**: `JsonPacienteRepository` está cerrado a modificaciones pero abierto a extensión. El Decorator agrega comportamiento (logging) creando una nueva clase que envuelve a la existente, sin tocar su código.
+
+**¿Qué principio SOLID aplica el Factory al centralizar la decisión de creación?**
+El principio **Single Responsibility (SRP)**: ningún controlador ni servicio decide qué repositorio instanciar. Esa responsabilidad recae exclusivamente en `RepositoryFactory`, facilitando el mantenimiento y el cambio de estrategia de persistencia en un solo lugar.
+
+**¿Podrías apilar dos Decorators? Por ejemplo: logging + caché. ¿Cómo lo harías?**
+Sí. Cada Decorator implementa `IPacienteRepository` y recibe otro `IPacienteRepository` en su constructor, por lo que se pueden encadenar:
+
+```csharp
+var base   = new JsonPacienteRepository(dataPath);
+var cached = new CachePacienteRepository(base);    // Decorator 1: caché
+var logged = new LoggingPacienteRepository(cached); // Decorator 2: logging
+```
+Las llamadas fluyen: `LoggingPacienteRepository` → `CachePacienteRepository` → `JsonPacienteRepository`.
+
+**¿Dónde agregarías `LoggingPacienteRepository` en el diagrama C4 de tu proyecto?**
+En el nivel de **Componentes** (C4 nivel 3), dentro del contenedor `CitasApp.Infrastructure`. Aparecería como un componente entre `PacienteController` y `JsonPacienteRepository`, con una relación de delegación hacia el repositorio real y una dependencia de la interfaz `IPacienteRepository` definida en `CitasApp.Domain`.
+
 ## Estructura de la solución
 
 ```
@@ -38,11 +132,27 @@ CitasApp.sln
 ├── CitasApp.Domain/          # Modelos e interfaces (puertos)
 │   ├── Models/
 │   └── Interfaces/
-├── CitasApp.Infrastructure/  # Repositorios JSON (adaptadores)
-│   └── Repositories/
+│       ├── IPacienteRepository.cs
+│       ├── IMedicoRepository.cs
+│       ├── ICitaRepository.cs
+│       └── ICitaObserver.cs        ← Observer: contrato
+├── CitasApp.Infrastructure/  # Adaptadores concretos
+│   ├── Repositories/
+│   │   ├── JsonPacienteRepository.cs
+│   │   ├── MemoriaPacienteRepository.cs ← Factory: repo alternativo
+│   │   ├── LoggingPacienteRepository.cs ← Decorator
+│   │   └── RepositoryFactory.cs         ← Factory
+│   └── Observers/
+│       ├── SmsObserver.cs               ← Observer: concreto
+│       └── EmailObserver.cs             ← Observer: concreto
+├── CitasApp.Application/     # Servicios de aplicación
+│   └── Services/
+│       └── CitaService.cs               ← Observer: sujeto
 └── CitasApp.Web/             # Aplicación MVC (presentación)
     ├── Controllers/
     ├── Views/
+    ├── Services/
+    │   └── CitaServicio.cs
     └── Data/
 ```
 
