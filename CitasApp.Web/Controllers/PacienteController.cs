@@ -1,17 +1,18 @@
 using CitasApp.Data;
+using CitasApp.Interfaces;
 using CitasApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CitasApp.Controllers;
 
-public class PacienteController : Controller
+public class PacienteController(IPacienteRepository repo) : Controller
 {
     public IActionResult Index()
-        => View(DatosApp.Pacientes);
+        => View(repo.ObtenerTodos());
 
     public IActionResult Detalle(int id)
     {
-        var paciente = DatosApp.Pacientes.FirstOrDefault(p => p.Id == id);
+        var paciente = repo.ObtenerPorId(id);
         if (paciente == null) return NotFound();
         return View(paciente);
     }
@@ -30,7 +31,7 @@ public class PacienteController : Controller
 
     public IActionResult Editar(int id)
     {
-        var paciente = DatosApp.Pacientes.FirstOrDefault(p => p.Id == id);
+        var paciente = repo.ObtenerPorId(id);
         if (paciente == null) return NotFound();
         return View(paciente);
     }
@@ -41,9 +42,9 @@ public class PacienteController : Controller
         if (!ModelState.IsValid) return View(paciente);
         var existente = DatosApp.Pacientes.FirstOrDefault(p => p.Id == paciente.Id);
         if (existente == null) return NotFound();
-        existente.Nombre = paciente.Nombre;
+        existente.Nombre   = paciente.Nombre;
         existente.Apellido = paciente.Apellido;
-        existente.Email = paciente.Email;
+        existente.Email    = paciente.Email;
         existente.Telefono = paciente.Telefono;
         DatosApp.GuardarPacientes();
         return RedirectToAction(nameof(Index));

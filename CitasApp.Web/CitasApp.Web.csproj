@@ -10,6 +10,7 @@
     <ItemGroup>
         <ProjectReference Include="..\CitasApp.Domain\CitasApp.Domain.csproj" />
         <ProjectReference Include="..\CitasApp.Infrastructure\CitasApp.Infrastructure.csproj" />
+        <ProjectReference Include="..\CitasApp.Application\CitasApp.Application.csproj" />
     </ItemGroup>
 
 </Project>

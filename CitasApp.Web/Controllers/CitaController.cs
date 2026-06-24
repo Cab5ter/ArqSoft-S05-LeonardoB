@@ -1,23 +1,25 @@
+using CitasApp.Application.Services;
 using CitasApp.Data;
 using CitasApp.Models;
+using CitasApp.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CitasApp.Controllers;
 
-public class CitaController : Controller
+public class CitaController(CitaServicio citaServicio, CitaService citaService) : Controller
 {
     private static List<Cita> ConNavegacion(IEnumerable<Cita> citas) =>
         citas.Select(c => new Cita
         {
-            Id = c.Id,
+            Id         = c.Id,
             PacienteId = c.PacienteId,
-            MedicoId = c.MedicoId,
-            Fecha = c.Fecha,
-            Hora = c.Hora,
-            Motivo = c.Motivo,
-            Estado = c.Estado,
-            Paciente = DatosApp.Pacientes.FirstOrDefault(p => p.Id == c.PacienteId),
-            Medico = DatosApp.Medicos.FirstOrDefault(m => m.Id == c.MedicoId)
+            MedicoId   = c.MedicoId,
+            Fecha      = c.Fecha,
+            Hora       = c.Hora,
+            Motivo     = c.Motivo,
+            Estado     = c.Estado,
+            Paciente   = DatosApp.Pacientes.FirstOrDefault(p => p.Id == c.PacienteId),
+            Medico     = DatosApp.Medicos.FirstOrDefault(m => m.Id == c.MedicoId)
         }).ToList();
 
     public IActionResult Index()
@@ -36,9 +38,7 @@ public class CitaController : Controller
     public IActionResult Crear(Cita cita)
     {
         if (!ModelState.IsValid) { CargarListas(); return View(cita); }
-        cita.Id = DatosApp.SiguienteIdCita();
-        DatosApp.Citas.Add(cita);
-        DatosApp.GuardarCitas();
+        citaServicio.Crear(cita);
         return RedirectToAction(nameof(Index));
     }
 
@@ -54,34 +54,23 @@ public class CitaController : Controller
     public IActionResult Editar(Cita cita)
     {
         if (!ModelState.IsValid) { CargarListas(); return View(cita); }
-        var existente = DatosApp.Citas.FirstOrDefault(c => c.Id == cita.Id);
-        if (existente == null) return NotFound();
-        existente.PacienteId = cita.PacienteId;
-        existente.MedicoId = cita.MedicoId;
-        existente.Fecha = cita.Fecha;
-        existente.Hora = cita.Hora;
-        existente.Motivo = cita.Motivo;
-        existente.Estado = cita.Estado;
-        DatosApp.GuardarCitas();
+        citaServicio.Actualizar(cita);
+        if (cita.Estado == EstadoCita.Confirmada)
+            citaService.Confirmar(cita);
         return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
     public IActionResult Eliminar(int id)
     {
-        var cita = DatosApp.Citas.FirstOrDefault(c => c.Id == id);
-        if (cita != null)
-        {
-            DatosApp.Citas.Remove(cita);
-            DatosApp.GuardarCitas();
-        }
+        citaServicio.Eliminar(id);
         return RedirectToAction(nameof(Index));
     }
 
     private void CargarListas()
     {
         ViewBag.Pacientes = DatosApp.Pacientes;
-        ViewBag.Medicos = DatosApp.Medicos;
-        ViewBag.Estados = Enum.GetValues<EstadoCita>();
+        ViewBag.Medicos   = DatosApp.Medicos;
+        ViewBag.Estados   = Enum.GetValues<EstadoCita>();
     }
 }
