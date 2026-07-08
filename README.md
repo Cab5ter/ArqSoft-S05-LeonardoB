@@ -2,7 +2,7 @@
 
 Aplicación web MVC para la gestión de citas médicas. Permite administrar pacientes, médicos y citas con persistencia de datos en archivos JSON, organizada en una **arquitectura hexagonal multi-proyecto**.
 
-> 📐 **Documentación técnica y diagramas (Mermaid):** [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md) — arquitectura, modelo de dominio, patrones GoF y flujos de ejecución que reflejan el estado real del proyecto.
+> 📐 **Documentación técnica y diagramas (Mermaid):** [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md) — **modelo C4** (Contexto → Contenedores → Componentes → Código), patrones GoF y flujos de ejecución que reflejan el estado real del proyecto.
 
 ## Descripción
 
