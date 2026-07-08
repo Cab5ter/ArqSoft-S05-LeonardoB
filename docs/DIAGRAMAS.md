@@ -27,24 +27,29 @@ sistemas externos con los que se comunica. Las notificaciones **SMS/Email** hoy 
 (escriben en consola), pero se modelan como sistemas externos porque representan un canal fuera
 del sistema.
 
+> Los diagramas C4 de este documento se representan con `flowchart` estilizado (no con la sintaxis
+> `C4*` experimental de Mermaid) para lograr un trazado limpio; el modelo C4 es independiente de la
+> notación empleada.
+
 ```mermaid
-C4Context
-    title Nivel 1 - Contexto del sistema (CitasApp)
+flowchart TB
+    usuario["Usuario / Recepcionista<br/><b>[Persona]</b><br/>Gestiona pacientes, medicos y citas"]
+    consumidor["Consumidor de API<br/><b>[Persona]</b><br/>Consulta datos via REST"]
+    citasapp["CitasApp<br/><b>[Sistema]</b><br/>Gestion de citas medicas (Web MVC + API REST)"]
+    sms["Canal SMS<br/><b>[Sistema externo - simulado]</b>"]
+    email["Canal Email<br/><b>[Sistema externo - simulado]</b>"]
 
-    Person(usuario, "Usuario / Recepcionista", "Gestiona pacientes, medicos y citas desde el navegador")
-    Person(consumidor, "Consumidor de API", "Aplicaciones o clientes que consultan datos via REST")
+    usuario -->|"Administra (HTTPS)"| citasapp
+    consumidor -->|"Consulta (REST)"| citasapp
+    citasapp -->|"Notifica al confirmar cita"| sms
+    citasapp -->|"Notifica al confirmar cita"| email
 
-    System(citasapp, "CitasApp", "Sistema de gestion de citas medicas: interfaz web MVC + API REST")
-
-    System_Ext(sms, "Canal SMS (simulado)", "Notificacion de confirmacion por SMS - salida por consola")
-    System_Ext(email, "Canal Email (simulado)", "Notificacion de confirmacion por email - salida por consola")
-
-    Rel(usuario, citasapp, "Administra citas, pacientes y medicos", "HTTPS")
-    Rel(consumidor, citasapp, "Consulta pacientes, medicos y citas", "JSON / HTTPS")
-    Rel(citasapp, sms, "Notifica al confirmar una cita")
-    Rel(citasapp, email, "Notifica al confirmar una cita")
-
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
+    classDef person fill:#08427b,stroke:#052e56,color:#fff
+    classDef system fill:#1168bd,stroke:#0b4884,color:#fff
+    classDef ext fill:#6b6b6b,stroke:#4d4d4d,color:#fff
+    class usuario,consumidor person
+    class citasapp system
+    class sms,email ext
 ```
 
 ---
@@ -57,38 +62,37 @@ más el almacén de datos. Las flechas "usa" reflejan las `ProjectReference` rea
 `.csproj`; nótese que todas apuntan hacia el dominio.
 
 ```mermaid
-C4Container
-    title Nivel 2 - Contenedores (CitasApp)
+flowchart TB
+    usuario["Usuario / Recepcionista<br/><b>[Persona]</b>"]
+    consumidor["Consumidor de API<br/><b>[Persona]</b>"]
 
-    Person(usuario, "Usuario / Recepcionista", "Navegador web")
-    Person(consumidor, "Consumidor de API", "Cliente REST")
+    subgraph sys["Sistema CitasApp"]
+        direction TB
+        web["CitasApp.Web<br/><b>[Contenedor]</b><br/>ASP.NET Core MVC + Razor + Bootstrap 5"]
+        api["CitasApp.Api<br/><b>[Contenedor]</b><br/>ASP.NET Core Web API + Swagger"]
+        subgraph core["Nucleo hexagonal (librerias .NET 10)"]
+            direction TB
+            app["CitasApp.Application<br/><b>[Contenedor]</b><br/>Servicios / casos de uso"]
+            infra["CitasApp.Infrastructure<br/><b>[Contenedor]</b><br/>Adaptadores + patrones GoF"]
+            domain["CitasApp.Domain<br/><b>[Contenedor]</b><br/>Modelos + interfaces (puertos)"]
+            app --> infra --> domain
+        end
+        json[("Almacen JSON<br/><b>[Datos]</b><br/>pacientes / medicos / citas .json")]
+    end
 
-    System_Boundary(sb, "CitasApp") {
-        Container(web, "CitasApp.Web", "ASP.NET Core MVC + Razor + Bootstrap 5", "Interfaz web: CRUD de pacientes, medicos y citas")
-        Container(api, "CitasApp.Api", "ASP.NET Core Web API + Swagger", "API REST de solo lectura + calculadora de ejemplo")
-        Container(app, "CitasApp.Application", "Libreria .NET 10", "Servicios / casos de uso: CitaService (Observer), PacienteService, MedicoService")
-        Container(infra, "CitasApp.Infrastructure", "Libreria .NET 10", "Adaptadores: repos JSON y Memoria, RepositoryFactory, Decorator, Observers")
-        Container(domain, "CitasApp.Domain", "Libreria .NET 10", "Nucleo: modelos e interfaces (puertos)")
-        ContainerDb(json, "Almacen JSON", "System.Text.Json (archivos)", "pacientes.json, medicos.json, citas.json")
-    }
+    usuario -->|"Usa (HTTPS)"| web
+    consumidor -->|"Consulta (REST)"| api
+    web --> core
+    api --> core
+    web -->|"JsonDataService"| json
+    infra -->|"repos JSON"| json
 
-    Rel(usuario, web, "Usa", "HTTPS")
-    Rel(consumidor, api, "Consulta", "JSON / HTTPS")
-
-    Rel(web, app, "Usa")
-    Rel(web, infra, "Usa")
-    Rel(web, domain, "Usa")
-    Rel(api, app, "Usa")
-    Rel(api, infra, "Usa")
-    Rel(api, domain, "Usa")
-    Rel(app, infra, "Usa")
-    Rel(app, domain, "Usa")
-    Rel(infra, domain, "Usa")
-
-    Rel(web, json, "Carga y guarda datos (JsonDataService)", "File IO")
-    Rel(infra, json, "Lee datos (repos JSON)", "File IO")
-
-    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+    classDef person fill:#08427b,stroke:#052e56,color:#fff
+    classDef container fill:#1168bd,stroke:#0b4884,color:#fff
+    classDef db fill:#2e7d32,stroke:#1b5e20,color:#fff
+    class usuario,consumidor person
+    class web,api,app,infra,domain container
+    class json db
 ```
 
 ---
@@ -101,49 +105,52 @@ la **confirmación de una cita** (Observer). Participan componentes de `Web`, `I
 `Application`.
 
 ```mermaid
-C4Component
-    title Nivel 3 - Componentes (flujos de Paciente y confirmacion de Cita)
+flowchart TB
+    usuario["Usuario<br/><b>[Persona]</b>"]
 
-    Person(usuario, "Usuario", "Navegador")
+    subgraph web["CitasApp.Web [Contenedor]"]
+        pacCtrl["PacienteController<br/><b>[Componente]</b>"]
+        citaCtrl["CitaController<br/><b>[Componente]</b>"]
+        citaServicio["CitaServicio<br/><b>[Componente]</b>"]
+        datos["DatosApp / JsonDataService<br/><b>[Componente]</b>"]
+    end
 
-    Container_Boundary(web, "CitasApp.Web") {
-        Component(pacCtrl, "PacienteController", "MVC Controller", "CRUD de pacientes")
-        Component(citaCtrl, "CitaController", "MVC Controller", "CRUD de citas y confirmacion")
-        Component(citaServicio, "CitaServicio", "Clase", "Alta/edicion/baja de citas sobre DatosApp")
-        Component(datos, "DatosApp / JsonDataService", "Clases estaticas", "Estado en memoria y carga/guardado en JSON")
-    }
+    subgraph app["CitasApp.Application [Contenedor]"]
+        citaSvc["CitaService<br/><b>[Sujeto - Observer]</b>"]
+    end
 
-    Container_Boundary(app, "CitasApp.Application") {
-        Component(citaSvc, "CitaService", "Sujeto (Observer)", "Mantiene la lista de observadores y notifica")
-    }
+    subgraph infra["CitasApp.Infrastructure [Contenedor]"]
+        factory["RepositoryFactory<br/><b>[Factory]</b>"]
+        logging["LoggingPacienteRepository<br/><b>[Decorator]</b>"]
+        jsonRepo["JsonPacienteRepository<br/><b>[Adaptador]</b>"]
+        memRepo["MemoriaPacienteRepository<br/><b>[Adaptador]</b>"]
+        sms["SmsObserver<br/><b>[Observer concreto]</b>"]
+        email["EmailObserver<br/><b>[Observer concreto]</b>"]
+    end
 
-    Container_Boundary(infra, "CitasApp.Infrastructure") {
-        Component(factory, "RepositoryFactory", "Factory (estatico)", "Elige el repositorio segun el entorno")
-        Component(logging, "LoggingPacienteRepository", "Decorator", "Registra en log antes/despues y delega")
-        Component(jsonRepo, "JsonPacienteRepository", "Adaptador", "Lee pacientes.json")
-        Component(memRepo, "MemoriaPacienteRepository", "Adaptador", "Datos en memoria (entorno Production)")
-        Component(sms, "SmsObserver", "Observer concreto", "Simula SMS por consola")
-        Component(email, "EmailObserver", "Observer concreto", "Simula email por consola")
-    }
+    json[("pacientes.json<br/><b>[Datos]</b>")]
 
-    ContainerDb(json, "pacientes.json", "JSON", "Persistencia de pacientes")
+    usuario -->|"GET /Paciente"| pacCtrl
+    pacCtrl -->|"ObtenerTodos() : IPacienteRepository"| logging
+    factory -.->|"crea (envuelto)"| logging
+    logging -->|"delega"| jsonRepo
+    factory -.->|"crea (por defecto)"| jsonRepo
+    factory -.->|"crea (Production)"| memRepo
+    jsonRepo -->|"lee"| json
 
-    Rel(usuario, pacCtrl, "GET /Paciente")
-    Rel(pacCtrl, logging, "ObtenerTodos()", "IPacienteRepository")
-    Rel(factory, logging, "crea (repo envuelto)")
-    Rel(logging, jsonRepo, "delega")
-    Rel(factory, jsonRepo, "crea (por defecto)")
-    Rel(factory, memRepo, "crea (Production)")
-    Rel(jsonRepo, json, "lee")
+    usuario -->|"POST /Cita/Editar (Confirmada)"| citaCtrl
+    citaCtrl -->|"Actualizar()"| citaServicio
+    citaServicio -->|"GuardarCitas()"| datos
+    citaCtrl -->|"Confirmar()"| citaSvc
+    citaSvc -->|"Notificar()"| sms
+    citaSvc -->|"Notificar()"| email
 
-    Rel(usuario, citaCtrl, "POST /Cita/Editar (Confirmada)")
-    Rel(citaCtrl, citaServicio, "Actualizar()")
-    Rel(citaServicio, datos, "GuardarCitas()")
-    Rel(citaCtrl, citaSvc, "Confirmar()")
-    Rel(citaSvc, sms, "Notificar()", "ICitaObserver")
-    Rel(citaSvc, email, "Notificar()", "ICitaObserver")
-
-    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+    classDef person fill:#08427b,stroke:#052e56,color:#fff
+    classDef comp fill:#1168bd,stroke:#0b4884,color:#fff
+    classDef db fill:#2e7d32,stroke:#1b5e20,color:#fff
+    class usuario person
+    class pacCtrl,citaCtrl,citaServicio,datos,citaSvc,factory,logging,jsonRepo,memRepo,sms,email comp
+    class json db
 ```
 
 ---

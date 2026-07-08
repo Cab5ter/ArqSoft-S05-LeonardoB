@@ -134,39 +134,40 @@ librerías del diseño hexagonal. Las flechas "usa" reflejan las `ProjectReferen
 apuntan hacia el dominio.
 
 ```mermaid
-C4Container
-    title Estructura de la solucion - Contenedores (C4 nivel 2)
+flowchart TB
+    usuario["Usuario / Recepcionista<br/><b>[Persona]</b>"]
+    consumidor["Consumidor de API<br/><b>[Persona]</b>"]
 
-    Person(usuario, "Usuario / Recepcionista", "Navegador web")
-    Person(consumidor, "Consumidor de API", "Cliente REST")
+    subgraph sys["Sistema CitasApp"]
+        direction TB
+        web["CitasApp.Web<br/><b>[Contenedor]</b><br/>ASP.NET Core MVC + Razor + Bootstrap 5"]
+        api["CitasApp.Api<br/><b>[Contenedor]</b><br/>ASP.NET Core Web API + Swagger"]
+        subgraph core["Nucleo hexagonal (librerias .NET 10)"]
+            direction TB
+            app["CitasApp.Application<br/><b>[Contenedor]</b><br/>Servicios / casos de uso"]
+            infra["CitasApp.Infrastructure<br/><b>[Contenedor]</b><br/>Adaptadores + patrones GoF"]
+            domain["CitasApp.Domain<br/><b>[Contenedor]</b><br/>Modelos + interfaces (puertos)"]
+            app --> infra --> domain
+        end
+        json[("Almacen JSON<br/><b>[Datos]</b><br/>pacientes / medicos / citas .json")]
+    end
 
-    System_Boundary(sb, "CitasApp") {
-        Container(web, "CitasApp.Web", "ASP.NET Core MVC + Razor + Bootstrap 5", "Interfaz web: CRUD de pacientes, medicos y citas")
-        Container(api, "CitasApp.Api", "ASP.NET Core Web API + Swagger", "API REST de solo lectura + calculadora")
-        Container(app, "CitasApp.Application", "Libreria .NET 10", "Servicios: CitaService (Observer), PacienteService, MedicoService")
-        Container(infra, "CitasApp.Infrastructure", "Libreria .NET 10", "Adaptadores: repos JSON/Memoria, Factory, Decorator, Observers")
-        Container(domain, "CitasApp.Domain", "Libreria .NET 10", "Nucleo: modelos e interfaces (puertos)")
-        ContainerDb(json, "Almacen JSON", "System.Text.Json (archivos)", "pacientes.json, medicos.json, citas.json")
-    }
+    usuario -->|"Usa (HTTPS)"| web
+    consumidor -->|"Consulta (REST)"| api
+    web --> core
+    api --> core
+    web -->|"JsonDataService"| json
+    infra -->|"repos JSON"| json
 
-    Rel(usuario, web, "Usa", "HTTPS")
-    Rel(consumidor, api, "Consulta", "JSON / HTTPS")
-
-    Rel(web, app, "Usa")
-    Rel(web, infra, "Usa")
-    Rel(web, domain, "Usa")
-    Rel(api, app, "Usa")
-    Rel(api, infra, "Usa")
-    Rel(api, domain, "Usa")
-    Rel(app, infra, "Usa")
-    Rel(app, domain, "Usa")
-    Rel(infra, domain, "Usa")
-
-    Rel(web, json, "Carga y guarda (JsonDataService)", "File IO")
-    Rel(infra, json, "Lee (repos JSON)", "File IO")
-
-    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+    classDef person fill:#08427b,stroke:#052e56,color:#fff
+    classDef container fill:#1168bd,stroke:#0b4884,color:#fff
+    classDef db fill:#2e7d32,stroke:#1b5e20,color:#fff
+    class usuario,consumidor person
+    class web,api,app,infra,domain container
+    class json db
 ```
+
+*Diagrama del modelo C4 (nivel de contenedores) representado con `flowchart` para un trazado más claro; el modelo C4 es independiente de la notación.*
 
 > Los **4 niveles del modelo C4** (Contexto → Contenedores → Componentes → Código), los patrones GoF y los flujos de ejecución están en [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md).
 
