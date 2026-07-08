@@ -2,6 +2,8 @@
 
 Aplicación web MVC para la gestión de citas médicas. Permite administrar pacientes, médicos y citas con persistencia de datos en archivos JSON, organizada en una **arquitectura hexagonal multi-proyecto**.
 
+> 📐 **Documentación técnica y diagramas (Mermaid):** [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md) — arquitectura, modelo de dominio, patrones GoF y flujos de ejecución que reflejan el estado real del proyecto.
+
 ## Descripción
 
 CitasApp es un sistema que permite:
