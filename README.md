@@ -129,34 +129,41 @@ En el nivel de **Componentes** (C4 nivel 3), dentro del contenedor `CitasApp.Inf
 
 ## Estructura de la solución
 
+```mermaid
+flowchart TB
+    SLN(["CitasApp.sln"])
+
+    subgraph D["CitasApp.Domain — núcleo: modelos e interfaces (puertos)"]
+        DM["Models/<br/>Paciente · Medico · Cita · CitaJson · EstadoCita"]
+        DI["Interfaces/<br/>IPacienteRepository · IMedicoRepository · ICitaRepository<br/>ICitaObserver ← Observer: contrato"]
+    end
+
+    subgraph I["CitasApp.Infrastructure — adaptadores concretos"]
+        IR["Repositories/<br/>JsonPacienteRepository · JsonMedicoRepository · JsonCitaRepository<br/>MemoriaPacienteRepository ← Factory: repo alternativo<br/>LoggingPacienteRepository ← Decorator<br/>RepositoryFactory ← Factory"]
+        IO["Observers/<br/>SmsObserver · EmailObserver ← Observer: concretos"]
+    end
+
+    subgraph A["CitasApp.Application — servicios de aplicación"]
+        AS["Services/<br/>CitaService ← Observer: sujeto<br/>PacienteService · MedicoService"]
+    end
+
+    subgraph W["CitasApp.Web — aplicación MVC (presentación)"]
+        WC["Controllers/ · Views/"]
+        WS["Services/CitaServicio · Data/ (DatosApp · JsonDataService · json/)"]
+    end
+
+    subgraph AP["CitasApp.Api — API REST + Swagger"]
+        APC["Controllers/<br/>Pacientes · Medicos · Citas · Calculadora"]
+    end
+
+    SLN --> D
+    SLN --> I
+    SLN --> A
+    SLN --> W
+    SLN --> AP
 ```
-CitasApp.sln
-├── CitasApp.Domain/          # Modelos e interfaces (puertos)
-│   ├── Models/
-│   └── Interfaces/
-│       ├── IPacienteRepository.cs
-│       ├── IMedicoRepository.cs
-│       ├── ICitaRepository.cs
-│       └── ICitaObserver.cs        ← Observer: contrato
-├── CitasApp.Infrastructure/  # Adaptadores concretos
-│   ├── Repositories/
-│   │   ├── JsonPacienteRepository.cs
-│   │   ├── MemoriaPacienteRepository.cs ← Factory: repo alternativo
-│   │   ├── LoggingPacienteRepository.cs ← Decorator
-│   │   └── RepositoryFactory.cs         ← Factory
-│   └── Observers/
-│       ├── SmsObserver.cs               ← Observer: concreto
-│       └── EmailObserver.cs             ← Observer: concreto
-├── CitasApp.Application/     # Servicios de aplicación
-│   └── Services/
-│       └── CitaService.cs               ← Observer: sujeto
-└── CitasApp.Web/             # Aplicación MVC (presentación)
-    ├── Controllers/
-    ├── Views/
-    ├── Services/
-    │   └── CitaServicio.cs
-    └── Data/
-```
+
+> Diagramas más detallados (arquitectura, clases, patrones y flujos) en [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md).
 
 ## Tecnologías
 
