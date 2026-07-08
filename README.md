@@ -127,43 +127,48 @@ Las llamadas fluyen: `LoggingPacienteRepository` → `CachePacienteRepository` �
 **¿Dónde agregarías `LoggingPacienteRepository` en el diagrama C4 de tu proyecto?**
 En el nivel de **Componentes** (C4 nivel 3), dentro del contenedor `CitasApp.Infrastructure`. Aparecería como un componente entre `PacienteController` y `JsonPacienteRepository`, con una relación de delegación hacia el repositorio real y una dependencia de la interfaz `IPacienteRepository` definida en `CitasApp.Domain`.
 
-## Estructura de la solución
+## Estructura de la solución (modelo C4 — Contenedores)
+
+Vista de contenedores (C4 nivel 2): los dos *hosts* que reutilizan el mismo núcleo y las
+librerías del diseño hexagonal. Las flechas "usa" reflejan las `ProjectReference` reales; todas
+apuntan hacia el dominio.
 
 ```mermaid
-flowchart TB
-    SLN(["CitasApp.sln"])
+C4Container
+    title Estructura de la solucion - Contenedores (C4 nivel 2)
 
-    subgraph D["CitasApp.Domain — núcleo: modelos e interfaces (puertos)"]
-        DM["Models/<br/>Paciente · Medico · Cita · CitaJson · EstadoCita"]
-        DI["Interfaces/<br/>IPacienteRepository · IMedicoRepository · ICitaRepository<br/>ICitaObserver ← Observer: contrato"]
-    end
+    Person(usuario, "Usuario / Recepcionista", "Navegador web")
+    Person(consumidor, "Consumidor de API", "Cliente REST")
 
-    subgraph I["CitasApp.Infrastructure — adaptadores concretos"]
-        IR["Repositories/<br/>JsonPacienteRepository · JsonMedicoRepository · JsonCitaRepository<br/>MemoriaPacienteRepository ← Factory: repo alternativo<br/>LoggingPacienteRepository ← Decorator<br/>RepositoryFactory ← Factory"]
-        IO["Observers/<br/>SmsObserver · EmailObserver ← Observer: concretos"]
-    end
+    System_Boundary(sb, "CitasApp") {
+        Container(web, "CitasApp.Web", "ASP.NET Core MVC + Razor + Bootstrap 5", "Interfaz web: CRUD de pacientes, medicos y citas")
+        Container(api, "CitasApp.Api", "ASP.NET Core Web API + Swagger", "API REST de solo lectura + calculadora")
+        Container(app, "CitasApp.Application", "Libreria .NET 10", "Servicios: CitaService (Observer), PacienteService, MedicoService")
+        Container(infra, "CitasApp.Infrastructure", "Libreria .NET 10", "Adaptadores: repos JSON/Memoria, Factory, Decorator, Observers")
+        Container(domain, "CitasApp.Domain", "Libreria .NET 10", "Nucleo: modelos e interfaces (puertos)")
+        ContainerDb(json, "Almacen JSON", "System.Text.Json (archivos)", "pacientes.json, medicos.json, citas.json")
+    }
 
-    subgraph A["CitasApp.Application — servicios de aplicación"]
-        AS["Services/<br/>CitaService ← Observer: sujeto<br/>PacienteService · MedicoService"]
-    end
+    Rel(usuario, web, "Usa", "HTTPS")
+    Rel(consumidor, api, "Consulta", "JSON / HTTPS")
 
-    subgraph W["CitasApp.Web — aplicación MVC (presentación)"]
-        WC["Controllers/ · Views/"]
-        WS["Services/CitaServicio · Data/ (DatosApp · JsonDataService · json/)"]
-    end
+    Rel(web, app, "Usa")
+    Rel(web, infra, "Usa")
+    Rel(web, domain, "Usa")
+    Rel(api, app, "Usa")
+    Rel(api, infra, "Usa")
+    Rel(api, domain, "Usa")
+    Rel(app, infra, "Usa")
+    Rel(app, domain, "Usa")
+    Rel(infra, domain, "Usa")
 
-    subgraph AP["CitasApp.Api — API REST + Swagger"]
-        APC["Controllers/<br/>Pacientes · Medicos · Citas · Calculadora"]
-    end
+    Rel(web, json, "Carga y guarda (JsonDataService)", "File IO")
+    Rel(infra, json, "Lee (repos JSON)", "File IO")
 
-    SLN --> D
-    SLN --> I
-    SLN --> A
-    SLN --> W
-    SLN --> AP
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
 
-> Diagramas más detallados (arquitectura, clases, patrones y flujos) en [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md).
+> Los **4 niveles del modelo C4** (Contexto → Contenedores → Componentes → Código), los patrones GoF y los flujos de ejecución están en [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md).
 
 ## Tecnologías
 
