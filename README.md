@@ -127,11 +127,45 @@ Las llamadas fluyen: `LoggingPacienteRepository` → `CachePacienteRepository` �
 **¿Dónde agregarías `LoggingPacienteRepository` en el diagrama C4 de tu proyecto?**
 En el nivel de **Componentes** (C4 nivel 3), dentro del contenedor `CitasApp.Infrastructure`. Aparecería como un componente entre `PacienteController` y `JsonPacienteRepository`, con una relación de delegación hacia el repositorio real y una dependencia de la interfaz `IPacienteRepository` definida en `CitasApp.Domain`.
 
-## Estructura de la solución (modelo C4 — Contenedores)
+## Arquitectura — modelo C4
 
-Vista de contenedores (C4 nivel 2): los dos *hosts* que reutilizan el mismo núcleo y las
-librerías del diseño hexagonal. Las flechas "usa" reflejan las `ProjectReference` reales; todas
-apuntan hacia el dominio.
+CitasApp se documenta con el **modelo C4** (Simon Brown), que "hace zoom" en tres niveles:
+**Contexto → Contenedores → Componentes**. Los diagramas se representan con `flowchart`
+estilizado (el modelo C4 es independiente de la notación) y reflejan el estado real del código.
+
+> El **nivel 4 (Código)** no se dibuja como diagrama de cajas C4, sino como **diagramas de clases**
+> (dominio, puertos/adaptadores y patrones GoF); están en [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md),
+> junto con estos mismos tres niveles y los flujos de ejecución (secuencia).
+
+### C4 Nivel 1 — Contexto
+
+Actores y sistemas externos. Las notificaciones SMS/Email hoy están *simuladas* (escriben en consola).
+
+```mermaid
+flowchart TB
+    usuario["Usuario / Recepcionista<br/><b>[Persona]</b><br/>Gestiona pacientes, medicos y citas"]
+    consumidor["Consumidor de API<br/><b>[Persona]</b><br/>Consulta datos via REST"]
+    citasapp["CitasApp<br/><b>[Sistema]</b><br/>Gestion de citas medicas (Web MVC + API REST)"]
+    sms["Canal SMS<br/><b>[Sistema externo - simulado]</b>"]
+    email["Canal Email<br/><b>[Sistema externo - simulado]</b>"]
+
+    usuario -->|"Administra (HTTPS)"| citasapp
+    consumidor -->|"Consulta (REST)"| citasapp
+    citasapp -->|"Notifica al confirmar cita"| sms
+    citasapp -->|"Notifica al confirmar cita"| email
+
+    classDef person fill:#08427b,stroke:#052e56,color:#fff
+    classDef system fill:#1168bd,stroke:#0b4884,color:#fff
+    classDef ext fill:#6b6b6b,stroke:#4d4d4d,color:#fff
+    class usuario,consumidor person
+    class citasapp system
+    class sms,email ext
+```
+
+### C4 Nivel 2 — Contenedores
+
+Los dos *hosts* que reutilizan el mismo núcleo y las librerías del diseño hexagonal. Las flechas
+"usa" reflejan las `ProjectReference` reales; todas apuntan hacia el dominio.
 
 ```mermaid
 flowchart TB
@@ -167,9 +201,59 @@ flowchart TB
     class json db
 ```
 
-*Diagrama del modelo C4 (nivel de contenedores) representado con `flowchart` para un trazado más claro; el modelo C4 es independiente de la notación.*
+### C4 Nivel 3 — Componentes
 
-> Los **4 niveles del modelo C4** (Contexto → Contenedores → Componentes → Código), los patrones GoF y los flujos de ejecución están en [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md).
+Se abre el interior de los contenedores mostrando los dos flujos que concentran los patrones GoF:
+**listar pacientes** (Factory + Decorator) y **confirmar cita** (Observer).
+
+```mermaid
+flowchart TB
+    usuario["Usuario<br/><b>[Persona]</b>"]
+
+    subgraph web["CitasApp.Web [Contenedor]"]
+        pacCtrl["PacienteController<br/><b>[Componente]</b>"]
+        citaCtrl["CitaController<br/><b>[Componente]</b>"]
+        citaServicio["CitaServicio<br/><b>[Componente]</b>"]
+        datos["DatosApp / JsonDataService<br/><b>[Componente]</b>"]
+    end
+
+    subgraph app["CitasApp.Application [Contenedor]"]
+        citaSvc["CitaService<br/><b>[Sujeto - Observer]</b>"]
+    end
+
+    subgraph infra["CitasApp.Infrastructure [Contenedor]"]
+        factory["RepositoryFactory<br/><b>[Factory]</b>"]
+        logging["LoggingPacienteRepository<br/><b>[Decorator]</b>"]
+        jsonRepo["JsonPacienteRepository<br/><b>[Adaptador]</b>"]
+        memRepo["MemoriaPacienteRepository<br/><b>[Adaptador]</b>"]
+        sms["SmsObserver<br/><b>[Observer concreto]</b>"]
+        email["EmailObserver<br/><b>[Observer concreto]</b>"]
+    end
+
+    json[("pacientes.json<br/><b>[Datos]</b>")]
+
+    usuario -->|"GET /Paciente"| pacCtrl
+    pacCtrl -->|"ObtenerTodos() : IPacienteRepository"| logging
+    factory -.->|"crea (envuelto)"| logging
+    logging -->|"delega"| jsonRepo
+    factory -.->|"crea (por defecto)"| jsonRepo
+    factory -.->|"crea (Production)"| memRepo
+    jsonRepo -->|"lee"| json
+
+    usuario -->|"POST /Cita/Editar (Confirmada)"| citaCtrl
+    citaCtrl -->|"Actualizar()"| citaServicio
+    citaServicio -->|"GuardarCitas()"| datos
+    citaCtrl -->|"Confirmar()"| citaSvc
+    citaSvc -->|"Notificar()"| sms
+    citaSvc -->|"Notificar()"| email
+
+    classDef person fill:#08427b,stroke:#052e56,color:#fff
+    classDef comp fill:#1168bd,stroke:#0b4884,color:#fff
+    classDef db fill:#2e7d32,stroke:#1b5e20,color:#fff
+    class usuario person
+    class pacCtrl,citaCtrl,citaServicio,datos,citaSvc,factory,logging,jsonRepo,memRepo,sms,email comp
+    class json db
+```
 
 ## Tecnologías
 
