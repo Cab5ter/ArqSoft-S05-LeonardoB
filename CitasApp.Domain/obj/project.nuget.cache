@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "b3W/Nh2lRVg=",
+  "dgSpecHash": "IDa62xKi+2E=",
   "success": true,
   "projectFilePath": "/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/CitasApp.Domain.csproj",
   "expectedPackageFiles": [
-    "/home/cabster/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.8/microsoft.aspnetcore.app.ref.10.0.8.nupkg.sha512"
+    "/home/cabster/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.9/microsoft.aspnetcore.app.ref.10.0.9.nupkg.sha512"
   ],
   "logs": []
 }

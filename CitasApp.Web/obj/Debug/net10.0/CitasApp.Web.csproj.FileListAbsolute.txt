@@ -105,3 +105,5 @@
 /home/cabster/RiderProjects/CitasApp/CitasApp.Web/obj/Debug/net10.0/CitasApp.Web.pdb
 /home/cabster/RiderProjects/CitasApp/CitasApp.Web/obj/Debug/net10.0/CitasApp.Web.genruntimeconfig.cache
 /home/cabster/RiderProjects/CitasApp/CitasApp.Web/obj/Debug/net10.0/ref/CitasApp.Web.dll
+/home/cabster/RiderProjects/CitasApp/CitasApp.Web/bin/Debug/net10.0/CitasApp.Application.dll
+/home/cabster/RiderProjects/CitasApp/CitasApp.Web/bin/Debug/net10.0/CitasApp.Application.pdb

@@ -8,11 +8,24 @@
     ".NETCoreApp,Version=v10.0": {
       "CitasApp.Web/1.0.0": {
         "dependencies": {
+          "CitasApp.Application": "1.0.0",
           "CitasApp.Domain": "1.0.0",
           "CitasApp.Infrastructure": "1.0.0"
         },
         "runtime": {
           "CitasApp.Web.dll": {}
+        }
+      },
+      "CitasApp.Application/1.0.0": {
+        "dependencies": {
+          "CitasApp.Domain": "1.0.0",
+          "CitasApp.Infrastructure": "1.0.0"
+        },
+        "runtime": {
+          "CitasApp.Application.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "CitasApp.Domain/1.0.0": {
@@ -38,6 +51,11 @@
   },
   "libraries": {
     "CitasApp.Web/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "CitasApp.Application/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

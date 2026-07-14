@@ -2,6 +2,20 @@
   "version": 3,
   "targets": {
     "net10.0": {
+      "CitasApp.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "CitasApp.Domain": "1.0.0",
+          "CitasApp.Infrastructure": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/CitasApp.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/CitasApp.Application.dll": {}
+        }
+      },
       "CitasApp.Domain/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
@@ -28,6 +42,11 @@
     }
   },
   "libraries": {
+    "CitasApp.Application/1.0.0": {
+      "type": "project",
+      "path": "../CitasApp.Application/CitasApp.Application.csproj",
+      "msbuildProject": "../CitasApp.Application/CitasApp.Application.csproj"
+    },
     "CitasApp.Domain/1.0.0": {
       "type": "project",
       "path": "../CitasApp.Domain/CitasApp.Domain.csproj",
@@ -41,6 +60,7 @@
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "CitasApp.Application >= 1.0.0",
       "CitasApp.Domain >= 1.0.0",
       "CitasApp.Infrastructure >= 1.0.0"
     ]
@@ -70,6 +90,9 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
+            "/home/cabster/RiderProjects/CitasApp/CitasApp.Application/CitasApp.Application.csproj": {
+              "projectPath": "/home/cabster/RiderProjects/CitasApp/CitasApp.Application/CitasApp.Application.csproj"
+            },
             "/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/CitasApp.Domain.csproj": {
               "projectPath": "/home/cabster/RiderProjects/CitasApp/CitasApp.Domain/CitasApp.Domain.csproj"
             },
@@ -108,7 +131,7 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[10.0.8, 10.0.8]"
+            "version": "[10.0.9, 10.0.9]"
           }
         ],
         "frameworkReferences": {
@@ -119,7 +142,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.108/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.109/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",

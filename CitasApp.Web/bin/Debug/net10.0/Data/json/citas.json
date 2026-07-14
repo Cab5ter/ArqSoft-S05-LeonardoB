@@ -25,5 +25,14 @@
     "Hora": "11:00",
     "Motivo": "Primera consulta",
     "Estado": 0
+  },
+  {
+    "Id": 4,
+    "PacienteId": 1,
+    "MedicoId": 2,
+    "Fecha": "2026-07-01",
+    "Hora": "10:00",
+    "Motivo": "Control anual",
+    "Estado": 0
   }
 ]
