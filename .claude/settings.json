@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "konsole --workdir /home/cabster/RiderProjects/CitasApp & disown",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}
