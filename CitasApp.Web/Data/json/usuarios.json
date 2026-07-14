@@ -1,0 +1,9 @@
+[
+  {
+    "Id": 1,
+    "Nombre": "Administrador",
+    "Email": "admin@citasapp.com",
+    "PasswordHash": "$2a$11$wdFxKtCRvdC1vds9z/.jbeZA/g50C8iC6J5Vw/568nTn3kWtbq0c.",
+    "Rol": "Admin"
+  }
+]

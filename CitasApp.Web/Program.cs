@@ -3,10 +3,31 @@ using CitasApp.Data;
 using CitasApp.Interfaces;
 using CitasApp.Infrastructure.Repositories;
 using CitasApp.Infrastructure.Observers;
+using CitasApp.Infrastructure.Security;
 using CitasApp.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
+
+// Autenticación por cookie
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/Denegado";
+    });
+
+// Puertos y adaptadores de autenticación (arquitectura hexagonal + DIP)
+builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+builder.Services.AddScoped<IUsuarioRepository>(sp =>
+{
+    var env      = sp.GetRequiredService<IWebHostEnvironment>();
+    var dataPath = Path.Combine(env.ContentRootPath, "Data", "json");
+    return new JsonUsuarioRepository(dataPath);
+});
+builder.Services.AddScoped<AuthService>();
 
 // Factory + Decorator (Paciente)
 builder.Services.AddScoped<IPacienteRepository>(sp =>
@@ -40,6 +61,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();
 
@@ -49,5 +71,14 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 DatosApp.Inicializar(app.Environment.ContentRootPath);
+
+// Seed de usuario demo (idempotente): admin@citasapp.com / Admin123
+using (var scope = app.Services.CreateScope())
+{
+    var repo = scope.ServiceProvider.GetRequiredService<IUsuarioRepository>();
+    var auth = scope.ServiceProvider.GetRequiredService<AuthService>();
+    if (repo.ObtenerPorEmail("admin@citasapp.com") is null)
+        auth.Registrar("Administrador", "admin@citasapp.com", "Admin123", "Admin");
+}
 
 app.Run();
