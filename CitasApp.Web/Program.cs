@@ -50,6 +50,7 @@ builder.Services.AddSingleton<CitaService>(sp =>
 
 // CitaServicio para CRUD de citas
 builder.Services.AddSingleton<CitaServicio>();
+builder.Services.AddSingleton<ICitaConsulta, CitaConsulta>();
 
 var app = builder.Build();
 

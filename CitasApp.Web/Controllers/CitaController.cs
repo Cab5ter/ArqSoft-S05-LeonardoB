@@ -1,32 +1,20 @@
 using CitasApp.Application.Services;
-using CitasApp.Data;
 using CitasApp.Models;
 using CitasApp.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CitasApp.Controllers;
 
-public class CitaController(CitaServicio citaServicio, CitaService citaService) : Controller
+public class CitaController(
+    CitaServicio citaServicio,
+    CitaService citaService,
+    ICitaConsulta citaConsulta) : Controller
 {
-    private static List<Cita> ConNavegacion(IEnumerable<Cita> citas) =>
-        citas.Select(c => new Cita
-        {
-            Id         = c.Id,
-            PacienteId = c.PacienteId,
-            MedicoId   = c.MedicoId,
-            Fecha      = c.Fecha,
-            Hora       = c.Hora,
-            Motivo     = c.Motivo,
-            Estado     = c.Estado,
-            Paciente   = DatosApp.Pacientes.FirstOrDefault(p => p.Id == c.PacienteId),
-            Medico     = DatosApp.Medicos.FirstOrDefault(m => m.Id == c.MedicoId)
-        }).ToList();
-
     public IActionResult Index()
-        => View(ConNavegacion(DatosApp.Citas));
+        => View(citaConsulta.ObtenerTodas());
 
     public IActionResult PorPaciente(int pacienteId)
-        => View(ConNavegacion(DatosApp.Citas.Where(c => c.PacienteId == pacienteId)));
+        => View(citaConsulta.ObtenerPorPaciente(pacienteId));
 
     public IActionResult Crear()
     {
@@ -44,7 +32,7 @@ public class CitaController(CitaServicio citaServicio, CitaService citaService) 
 
     public IActionResult Editar(int id)
     {
-        var cita = DatosApp.Citas.FirstOrDefault(c => c.Id == id);
+        var cita = citaConsulta.ObtenerPorId(id);
         if (cita == null) return NotFound();
         CargarListas();
         return View(cita);
@@ -69,8 +57,8 @@ public class CitaController(CitaServicio citaServicio, CitaService citaService) 
 
     private void CargarListas()
     {
-        ViewBag.Pacientes = DatosApp.Pacientes;
-        ViewBag.Medicos   = DatosApp.Medicos;
+        ViewBag.Pacientes = citaConsulta.ObtenerPacientes();
+        ViewBag.Medicos   = citaConsulta.ObtenerMedicos();
         ViewBag.Estados   = Enum.GetValues<EstadoCita>();
     }
 }
