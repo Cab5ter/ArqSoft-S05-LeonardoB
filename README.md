@@ -1,10 +1,10 @@
-# CitasApp — refactorización con Extract Class, DI y SOLID
+# CitasApp — refactorización con Extract Class y DI
 
 ## Descripción
 
 CitasApp es una aplicación ASP.NET Core para administrar pacientes, médicos y citas médicas. En este proyecto implementé operaciones de consulta y mantenimiento, persistencia en archivos JSON, autenticación mediante cookies y notificaciones simuladas cuando una cita es confirmada.
 
-El objetivo principal de este trabajo fue refactorizar el módulo de citas mediante **Extract Class** e **inyección de dependencias (DI)**, manteniendo el comportamiento de la aplicación y mejorando el cumplimiento de los principios **SOLID**.
+El objetivo principal de este trabajo fue refactorizar el módulo de citas mediante **Extract Class** e **inyección de dependencias (DI)**, manteniendo el comportamiento de la aplicación.
 
 ## Funcionalidades
 
@@ -115,28 +115,6 @@ Flujo después de la refactorización:
 CitaController ──> ICitaConsulta <── CitaConsulta ──> DatosApp ──> JSON
    HTTP y vistas       contrato       consultas y composición
 ```
-
-## Principios SOLID aplicados
-
-### SRP — Single Responsibility Principle
-
-El controlador se concentra en coordinar las solicitudes HTTP, validar el modelo y devolver una vista o redirección. `CitaConsulta` concentra la obtención y preparación de los datos de lectura.
-
-### OCP — Open/Closed Principle
-
-Es posible crear otra implementación de `ICitaConsulta`, por ejemplo una consulta basada en Entity Framework Core, sin cambiar las acciones del controlador.
-
-### LSP — Liskov Substitution Principle
-
-Cualquier implementación que respete el contrato `ICitaConsulta` puede sustituir a `CitaConsulta` y ser utilizada por `CitaController`.
-
-### ISP — Interface Segregation Principle
-
-La interfaz expone únicamente las operaciones de consulta que necesita el controlador de citas. No obliga a implementar acciones ajenas como autenticación o notificaciones.
-
-### DIP — Dependency Inversion Principle
-
-`CitaController`, como módulo de alto nivel, depende de `ICitaConsulta` y no de la clase concreta `CitaConsulta` ni directamente de `DatosApp`. La implementación concreta se decide en `Program.cs`, que funciona como raíz de composición.
 
 ## Resultado obtenido
 
