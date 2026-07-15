@@ -1,285 +1,248 @@
-# CitasApp — Sistema de Citas Médicas
-
-Aplicación web MVC para la gestión de citas médicas. Permite administrar pacientes, médicos y citas con persistencia de datos en archivos JSON, organizada en una **arquitectura hexagonal multi-proyecto**.
-
-> 📐 **Documentación técnica y diagramas (Mermaid):** [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md) — **modelo C4** (Contexto → Contenedores → Componentes → Código), patrones GoF y flujos de ejecución que reflejan el estado real del proyecto.
+# CitasApp — refactorización con Extract Class, DI y SOLID
 
 ## Descripción
 
-CitasApp es un sistema que permite:
+CitasApp es una aplicación ASP.NET Core para administrar pacientes, médicos y citas médicas. En este proyecto implementé operaciones de consulta y mantenimiento, persistencia en archivos JSON, autenticación mediante cookies y notificaciones simuladas cuando una cita es confirmada.
 
-- Registrar y administrar **pacientes** con su información de contacto.
-- Gestionar el directorio de **médicos** y sus especialidades.
-- Programar **citas** médicas asignando paciente, médico, fecha, hora y motivo.
-- Ver el estado de cada cita (Pendiente, Confirmada, Cancelada).
-- Persistencia total: los datos se guardan en archivos JSON y se mantienen entre reinicios de la aplicación.
+El objetivo principal de este trabajo fue refactorizar el módulo de citas mediante **Extract Class** e **inyección de dependencias (DI)**, manteniendo el comportamiento de la aplicación y mejorando el cumplimiento de los principios **SOLID**.
 
-## Qué se hizo
+## Funcionalidades
 
-Se desarrolló la aplicación con **arquitectura hexagonal** (puertos y adaptadores), separando la solución en tres proyectos con responsabilidades claras:
+- Registro, consulta y edición de pacientes.
+- Registro, consulta y edición de médicos.
+- Creación, edición, eliminación y filtrado de citas por paciente.
+- Estados de cita: pendiente, confirmada y cancelada.
+- Persistencia local mediante archivos JSON.
+- Inicio y cierre de sesión con autenticación por cookies.
+- Notificaciones simuladas por SMS y correo al confirmar una cita.
+- API REST para consultar pacientes, médicos y citas.
 
-| Proyecto | Capa | Contenido |
-|---|---|---|
-| **CitasApp.Domain** | Dominio (núcleo) | Modelos (`Paciente`, `Medico`, `Cita`, `CitaJson`, `EstadoCita`) y puertos: interfaces de repositorio (`IPacienteRepository`, `IMedicoRepository`, `ICitaRepository`). No depende de nada. |
-| **CitasApp.Infrastructure** | Infraestructura (adaptadores) | Implementaciones de los repositorios sobre archivos JSON (`JsonPacienteRepository`, `JsonMedicoRepository`, `JsonCitaRepository`). Depende solo de Domain. |
-| **CitasApp.Web** | Presentación | Controladores MVC, vistas Razor, `Program.cs` e inicialización de datos (`DatosApp`, `JsonDataService`). Depende de Domain e Infrastructure. |
+## Problema antes de la refactorización
 
-Con esto, el dominio queda aislado de los detalles de persistencia: la capa web consume las abstracciones del dominio y la infraestructura provee los adaptadores concretos, de modo que el almacenamiento JSON podría reemplazarse (por ejemplo, por una base de datos) sin tocar el núcleo de la aplicación.
+`CitaController` tenía más responsabilidades de las que corresponden a un controlador MVC. Además de recibir peticiones HTTP y seleccionar vistas, también:
 
-Sobre esta base se implementó:
+- Consultaba directamente las colecciones estáticas de `DatosApp`.
+- Filtraba las citas por paciente.
+- Buscaba citas por identificador.
+- Cargaba las listas de pacientes y médicos.
+- Construía copias de las citas agregando sus propiedades de navegación.
 
-- Modelos de dominio: `Paciente`, `Medico`, `Cita` y el enum `EstadoCita`.
-- Controladores MVC con acciones de listado, detalle, creación y edición para cada entidad.
-- Vistas Razor con Bootstrap y navegación global mediante navbar.
-- Persistencia en archivos JSON con `System.Text.Json`, con datos semilla (*seed*) cuando no existen archivos previos.
+El método privado `ConNavegacion` concentraba lógica de consulta y transformación dentro del controlador. Esto producía un acoplamiento directo entre la presentación y el origen de datos, dificultaba las pruebas y obligaba a modificar el controlador si cambiaba la manera de obtener las citas.
 
-## Patrones de diseño GoF implementados
+Flujo anterior:
 
-### Factory — `RepositoryFactory`
+```text
+CitaController ───────────────> DatosApp
+       └── ConNavegacion()      colecciones estáticas y JSON
+```
 
-Clase estática en `CitasApp.Infrastructure/Repositories/RepositoryFactory.cs` que centraliza la decisión de qué repositorio instanciar según el entorno de ejecución:
+## Refactorización realizada
 
-- **`"Production"`** → `MemoriaPacienteRepository` (simula una base de datos SQL en memoria)
-- **Cualquier otro entorno** → `JsonPacienteRepository` (persistencia en archivo JSON)
+### 1. Extract Class
+
+Extraje la lógica de consulta y composición de citas a la clase `CitaConsulta`. Esta clase se encarga de:
+
+- Obtener todas las citas.
+- Obtener las citas correspondientes a un paciente.
+- Buscar una cita por su identificador.
+- Proporcionar las listas de pacientes y médicos.
+- Agregar los objetos `Paciente` y `Medico` a cada cita para mostrarlos en las vistas.
 
 ```csharp
-var repo = RepositoryFactory.CrearPacienteRepository(
-               builder.Environment.EnvironmentName, dataPath);
-```
-
-Esto desacopla al consumidor del repositorio concreto: cambiar de JSON a SQL solo requiere modificar la Factory, sin tocar ningún controlador.
-
-### Decorator — `LoggingPacienteRepository`
-
-Clase en `CitasApp.Infrastructure/Repositories/LoggingPacienteRepository.cs` que implementa `IPacienteRepository` y **envuelve** a otro repositorio real, añadiendo logging en consola antes y después de cada operación sin modificar el repositorio original.
-
-```
-IPacienteRepository
-    ↑ implementa
-LoggingPacienteRepository  →  delega a  →  JsonPacienteRepository
-```
-
-Al navegar a `/Paciente` se ve en la terminal:
-
-```
-[2026-06-24 09:54:28] ObtenerTodos — inicio
-[2026-06-24 09:54:28] ObtenerTodos — 3 registros
-```
-
-En `Program.cs` se conectan Factory y Decorator:
-
-```csharp
-builder.Services.AddScoped<IPacienteRepository>(sp =>
+public class CitaConsulta : ICitaConsulta
 {
-    var repo = RepositoryFactory.CrearPacienteRepository(entorno, dataPath);
-    return new LoggingPacienteRepository(repo);  // Decorator envuelve al repo
-});
+    public IReadOnlyCollection<Cita> ObtenerTodas() =>
+        AgregarNavegacion(DatosApp.Citas);
+
+    public IReadOnlyCollection<Cita> ObtenerPorPaciente(int pacienteId) =>
+        AgregarNavegacion(DatosApp.Citas.Where(
+            cita => cita.PacienteId == pacienteId));
+
+    public Cita? ObtenerPorId(int id) =>
+        DatosApp.Citas.FirstOrDefault(cita => cita.Id == id);
+}
 ```
 
-### Observer — `CitaService` + `SmsObserver` + `EmailObserver`
+Con esta extracción, `CitaController` deja de conocer cómo se consultan y transforman los datos.
 
-Sistema de notificaciones que se activa al confirmar una cita. Sigue el principio de que el **sujeto** (`CitaService`) no conoce a los observadores concretos — solo depende de la interfaz `ICitaObserver` definida en Domain.
+### 2. Creación de la abstracción
 
-| Clase | Capa | Rol |
-|---|---|---|
-| `ICitaObserver` | Domain | Contrato: `Notificar(Cita cita, string evento)` |
-| `SmsObserver` | Infrastructure | Observador concreto — simula envío de SMS |
-| `EmailObserver` | Infrastructure | Observador concreto — simula envío de email |
-| `CitaService` | Application | **Sujeto** — mantiene la lista de observadores y notifica al confirmar |
-
-`CitaService` solo importa namespaces de Domain (`CitasApp.Interfaces`, `CitasApp.Models`), nunca de Infrastructure. Los observadores concretos se suscriben desde `Program.cs` (capa Web), que es el único punto donde convergen todas las capas:
+Creé la interfaz `ICitaConsulta` para definir el contrato que necesita el controlador:
 
 ```csharp
-builder.Services.AddSingleton<CitaService>(sp =>
+public interface ICitaConsulta
 {
-    var service = new CitaService();
-    service.Suscribir(new SmsObserver());    // Infrastructure
-    service.Suscribir(new EmailObserver());  // Infrastructure
-    return service;
-});
+    IReadOnlyCollection<Cita> ObtenerTodas();
+    IReadOnlyCollection<Cita> ObtenerPorPaciente(int pacienteId);
+    Cita? ObtenerPorId(int id);
+    IReadOnlyCollection<Paciente> ObtenerPacientes();
+    IReadOnlyCollection<Medico> ObtenerMedicos();
+}
 ```
 
-Al editar una cita y cambiar su estado a `Confirmada`, el controlador llama a `citaService.Confirmar(cita)` y aparece en la terminal:
+Se utilizan colecciones de solo lectura en el contrato porque el consumidor necesita consultar los resultados, no modificar directamente su contenido.
 
-```
-[2026-06-24 10:12:48] [SMS]   Cita #1 confirmada | Paciente=1  Médico=1  Fecha=01/06/2026  Estado=Confirmada
-[2026-06-24 10:12:48] [EMAIL] Simulando envío → Cita #1 ha sido confirmada para el 01/06/2026 a las 09:00
-```
+### 3. Inyección de dependencias
 
-## Preguntas de reflexión
-
-**¿Qué principio SOLID aplica el Decorator al no modificar `JsonPacienteRepository`?**
-El principio **Open/Closed (OCP)**: `JsonPacienteRepository` está cerrado a modificaciones pero abierto a extensión. El Decorator agrega comportamiento (logging) creando una nueva clase que envuelve a la existente, sin tocar su código.
-
-**¿Qué principio SOLID aplica el Factory al centralizar la decisión de creación?**
-El principio **Single Responsibility (SRP)**: ningún controlador ni servicio decide qué repositorio instanciar. Esa responsabilidad recae exclusivamente en `RepositoryFactory`, facilitando el mantenimiento y el cambio de estrategia de persistencia en un solo lugar.
-
-**¿Podrías apilar dos Decorators? Por ejemplo: logging + caché. ¿Cómo lo harías?**
-Sí. Cada Decorator implementa `IPacienteRepository` y recibe otro `IPacienteRepository` en su constructor, por lo que se pueden encadenar:
+Inyecté `ICitaConsulta` mediante el constructor primario de `CitaController`:
 
 ```csharp
-var base   = new JsonPacienteRepository(dataPath);
-var cached = new CachePacienteRepository(base);    // Decorator 1: caché
-var logged = new LoggingPacienteRepository(cached); // Decorator 2: logging
-```
-Las llamadas fluyen: `LoggingPacienteRepository` → `CachePacienteRepository` → `JsonPacienteRepository`.
-
-**¿Dónde agregarías `LoggingPacienteRepository` en el diagrama C4 de tu proyecto?**
-En el nivel de **Componentes** (C4 nivel 3), dentro del contenedor `CitasApp.Infrastructure`. Aparecería como un componente entre `PacienteController` y `JsonPacienteRepository`, con una relación de delegación hacia el repositorio real y una dependencia de la interfaz `IPacienteRepository` definida en `CitasApp.Domain`.
-
-## Arquitectura — modelo C4
-
-CitasApp se documenta con el **modelo C4** (Simon Brown), que "hace zoom" en tres niveles:
-**Contexto → Contenedores → Componentes**. Los diagramas se representan con `flowchart`
-estilizado (el modelo C4 es independiente de la notación) y reflejan el estado real del código.
-
-> El **nivel 4 (Código)** no se dibuja como diagrama de cajas C4, sino como **diagramas de clases**
-> (dominio, puertos/adaptadores y patrones GoF); están en [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md),
-> junto con estos mismos tres niveles y los flujos de ejecución (secuencia).
-
-### C4 Nivel 1 — Contexto
-
-Actores y sistemas externos. Las notificaciones SMS/Email hoy están *simuladas* (escriben en consola).
-
-```mermaid
-flowchart TB
-    usuario["Usuario / Recepcionista<br/><b>[Persona]</b><br/>Gestiona pacientes, medicos y citas"]
-    consumidor["Consumidor de API<br/><b>[Persona]</b><br/>Consulta datos via REST"]
-    citasapp["CitasApp<br/><b>[Sistema]</b><br/>Gestion de citas medicas (Web MVC + API REST)"]
-    sms["Canal SMS<br/><b>[Sistema externo - simulado]</b>"]
-    email["Canal Email<br/><b>[Sistema externo - simulado]</b>"]
-
-    usuario -->|"Administra (HTTPS)"| citasapp
-    consumidor -->|"Consulta (REST)"| citasapp
-    citasapp -->|"Notifica al confirmar cita"| sms
-    citasapp -->|"Notifica al confirmar cita"| email
-
-    classDef person fill:#08427b,stroke:#052e56,color:#fff
-    classDef system fill:#1168bd,stroke:#0b4884,color:#fff
-    classDef ext fill:#6b6b6b,stroke:#4d4d4d,color:#fff
-    class usuario,consumidor person
-    class citasapp system
-    class sms,email ext
+public class CitaController(
+    CitaServicio citaServicio,
+    CitaService citaService,
+    ICitaConsulta citaConsulta) : Controller
 ```
 
-### C4 Nivel 2 — Contenedores
+El controlador ahora delega las consultas:
 
-Los dos *hosts* que reutilizan el mismo núcleo y las librerías del diseño hexagonal. Las flechas
-"usa" reflejan las `ProjectReference` reales; todas apuntan hacia el dominio.
+```csharp
+public IActionResult Index()
+    => View(citaConsulta.ObtenerTodas());
 
-```mermaid
-flowchart TB
-    usuario["Usuario / Recepcionista<br/><b>[Persona]</b>"]
-    consumidor["Consumidor de API<br/><b>[Persona]</b>"]
-
-    subgraph sys["Sistema CitasApp"]
-        direction TB
-        web["CitasApp.Web<br/><b>[Contenedor]</b><br/>ASP.NET Core MVC + Razor + Bootstrap 5"]
-        api["CitasApp.Api<br/><b>[Contenedor]</b><br/>ASP.NET Core Web API + Swagger"]
-        subgraph core["Nucleo hexagonal (librerias .NET 10)"]
-            direction TB
-            app["CitasApp.Application<br/><b>[Contenedor]</b><br/>Servicios / casos de uso"]
-            infra["CitasApp.Infrastructure<br/><b>[Contenedor]</b><br/>Adaptadores + patrones GoF"]
-            domain["CitasApp.Domain<br/><b>[Contenedor]</b><br/>Modelos + interfaces (puertos)"]
-            app --> infra --> domain
-        end
-        json[("Almacen JSON<br/><b>[Datos]</b><br/>pacientes / medicos / citas .json")]
-    end
-
-    usuario -->|"Usa (HTTPS)"| web
-    consumidor -->|"Consulta (REST)"| api
-    web --> core
-    api --> core
-    web -->|"JsonDataService"| json
-    infra -->|"repos JSON"| json
-
-    classDef person fill:#08427b,stroke:#052e56,color:#fff
-    classDef container fill:#1168bd,stroke:#0b4884,color:#fff
-    classDef db fill:#2e7d32,stroke:#1b5e20,color:#fff
-    class usuario,consumidor person
-    class web,api,app,infra,domain container
-    class json db
+public IActionResult PorPaciente(int pacienteId)
+    => View(citaConsulta.ObtenerPorPaciente(pacienteId));
 ```
 
-### C4 Nivel 3 — Componentes
+Finalmente registré la relación entre la abstracción y su implementación en el contenedor de ASP.NET Core:
 
-Se abre el interior de los contenedores mostrando los dos flujos que concentran los patrones GoF:
-**listar pacientes** (Factory + Decorator) y **confirmar cita** (Observer).
-
-```mermaid
-flowchart TB
-    usuario["Usuario<br/><b>[Persona]</b>"]
-
-    subgraph web["CitasApp.Web [Contenedor]"]
-        pacCtrl["PacienteController<br/><b>[Componente]</b>"]
-        citaCtrl["CitaController<br/><b>[Componente]</b>"]
-        citaServicio["CitaServicio<br/><b>[Componente]</b>"]
-        datos["DatosApp / JsonDataService<br/><b>[Componente]</b>"]
-    end
-
-    subgraph app["CitasApp.Application [Contenedor]"]
-        citaSvc["CitaService<br/><b>[Sujeto - Observer]</b>"]
-    end
-
-    subgraph infra["CitasApp.Infrastructure [Contenedor]"]
-        factory["RepositoryFactory<br/><b>[Factory]</b>"]
-        logging["LoggingPacienteRepository<br/><b>[Decorator]</b>"]
-        jsonRepo["JsonPacienteRepository<br/><b>[Adaptador]</b>"]
-        memRepo["MemoriaPacienteRepository<br/><b>[Adaptador]</b>"]
-        sms["SmsObserver<br/><b>[Observer concreto]</b>"]
-        email["EmailObserver<br/><b>[Observer concreto]</b>"]
-    end
-
-    json[("pacientes.json<br/><b>[Datos]</b>")]
-
-    usuario -->|"GET /Paciente"| pacCtrl
-    pacCtrl -->|"ObtenerTodos() : IPacienteRepository"| logging
-    factory -.->|"crea (envuelto)"| logging
-    logging -->|"delega"| jsonRepo
-    factory -.->|"crea (por defecto)"| jsonRepo
-    factory -.->|"crea (Production)"| memRepo
-    jsonRepo -->|"lee"| json
-
-    usuario -->|"POST /Cita/Editar (Confirmada)"| citaCtrl
-    citaCtrl -->|"Actualizar()"| citaServicio
-    citaServicio -->|"GuardarCitas()"| datos
-    citaCtrl -->|"Confirmar()"| citaSvc
-    citaSvc -->|"Notificar()"| sms
-    citaSvc -->|"Notificar()"| email
-
-    classDef person fill:#08427b,stroke:#052e56,color:#fff
-    classDef comp fill:#1168bd,stroke:#0b4884,color:#fff
-    classDef db fill:#2e7d32,stroke:#1b5e20,color:#fff
-    class usuario person
-    class pacCtrl,citaCtrl,citaServicio,datos,citaSvc,factory,logging,jsonRepo,memRepo,sms,email comp
-    class json db
+```csharp
+builder.Services.AddSingleton<ICitaConsulta, CitaConsulta>();
 ```
+
+Flujo después de la refactorización:
+
+```text
+CitaController ──> ICitaConsulta <── CitaConsulta ──> DatosApp ──> JSON
+   HTTP y vistas       contrato       consultas y composición
+```
+
+## Principios SOLID aplicados
+
+### SRP — Single Responsibility Principle
+
+El controlador se concentra en coordinar las solicitudes HTTP, validar el modelo y devolver una vista o redirección. `CitaConsulta` concentra la obtención y preparación de los datos de lectura.
+
+### OCP — Open/Closed Principle
+
+Es posible crear otra implementación de `ICitaConsulta`, por ejemplo una consulta basada en Entity Framework Core, sin cambiar las acciones del controlador.
+
+### LSP — Liskov Substitution Principle
+
+Cualquier implementación que respete el contrato `ICitaConsulta` puede sustituir a `CitaConsulta` y ser utilizada por `CitaController`.
+
+### ISP — Interface Segregation Principle
+
+La interfaz expone únicamente las operaciones de consulta que necesita el controlador de citas. No obliga a implementar acciones ajenas como autenticación o notificaciones.
+
+### DIP — Dependency Inversion Principle
+
+`CitaController`, como módulo de alto nivel, depende de `ICitaConsulta` y no de la clase concreta `CitaConsulta` ni directamente de `DatosApp`. La implementación concreta se decide en `Program.cs`, que funciona como raíz de composición.
+
+## Resultado obtenido
+
+La refactorización produjo los siguientes beneficios:
+
+- Menor acoplamiento entre el controlador y el almacenamiento.
+- Responsabilidades más claras y clases más pequeñas.
+- Código más sencillo de mantener y extender.
+- Posibilidad de sustituir la fuente de consultas.
+- Mejor capacidad para crear pruebas unitarias usando una implementación falsa de `ICitaConsulta`.
+- Conservación del comportamiento existente de las vistas y acciones MVC.
+
+## Arquitectura del proyecto
+
+| Proyecto | Responsabilidad |
+|---|---|
+| `CitasApp.Domain` | Modelos del dominio e interfaces principales. |
+| `CitasApp.Application` | Servicios y casos de uso, como autenticación y confirmación de citas. |
+| `CitasApp.Infrastructure` | Repositorios JSON, seguridad, observadores y otros adaptadores. |
+| `CitasApp.Web` | Aplicación MVC, controladores, vistas, servicios web y configuración de DI. |
+| `CitasApp.Api` | Endpoints REST para pacientes, médicos y citas. |
+
+La documentación técnica complementaria y los diagramas se encuentran en [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md).
+
+## Patrones utilizados
+
+- **Factory:** `RepositoryFactory` selecciona la implementación del repositorio de pacientes.
+- **Decorator:** `LoggingPacienteRepository` agrega registro de operaciones sin modificar el repositorio decorado.
+- **Observer:** `CitaService` notifica a `SmsObserver` y `EmailObserver` cuando una cita se confirma.
+- **Dependency Injection:** las implementaciones se configuran en `Program.cs` y se entregan a sus consumidores.
+- **Extract Class:** `CitaConsulta` recibe la lógica de consulta que antes estaba dentro de `CitaController`.
 
 ## Tecnologías
 
-| Tecnología | Descripción |
-|---|---|
-| **ASP.NET Core 10** | Framework principal — patrón MVC |
-| **C# 13** | Lenguaje de programación |
-| **Razor Views** | Motor de vistas del lado del servidor |
-| **Bootstrap 5** | Estilos y componentes visuales |
-| **System.Text.Json** | Serialización/deserialización de datos JSON |
-| **JSON (archivos)** | Capa de persistencia (`Data/json/`) |
+- .NET 10
+- ASP.NET Core MVC
+- ASP.NET Core Web API
+- Razor Views
+- Bootstrap
+- System.Text.Json
+- Autenticación por cookies
+- BCrypt para contraseñas
 
-## Capturas de pantalla
+## Estructura relevante
 
-### Inicio
-![Inicio](screenshots/home.png)
+```text
+CitasApp/
+├── CitasApp.Domain/
+│   ├── Interfaces/
+│   └── Models/
+├── CitasApp.Application/
+│   └── Services/
+├── CitasApp.Infrastructure/
+│   ├── Observers/
+│   ├── Repositories/
+│   └── Security/
+├── CitasApp.Web/
+│   ├── Controllers/
+│   │   └── CitaController.cs
+│   ├── Data/
+│   ├── Services/
+│   │   ├── CitaConsulta.cs
+│   │   ├── ICitaConsulta.cs
+│   │   └── CitaServicio.cs
+│   ├── Views/
+│   └── Program.cs
+├── CitasApp.Api/
+└── docs/
+    └── DIAGRAMAS.md
+```
 
-### Pacientes
-![Pacientes](screenshots/pacientes.png)
+## Ejecución
 
-### Médicos
-![Médicos](screenshots/medicos.png)
+### Requisitos
 
-### Citas
-![Citas](screenshots/citas.png)
+- SDK de .NET 10.
 
----
+### Aplicación web
 
-> **Nota:** Se utilizó IA (Claude) como apoyo durante el desarrollo, principalmente para corregir errores de compilación y resolver dudas técnicas puntuales.
+```bash
+dotnet restore CitasApp.sln
+dotnet run --project CitasApp.Web/CitasApp.Web.csproj
+```
+
+### API
+
+```bash
+dotnet run --project CitasApp.Api/CitasApp.Api.csproj
+```
+
+Al iniciar la aplicación web se crean datos de ejemplo si los archivos JSON están vacíos. También se registra de forma idempotente el usuario de demostración:
+
+```text
+Correo: admin@citasapp.com
+Contraseña: Admin123
+```
+
+## Archivos modificados durante la refactorización
+
+- `CitasApp.Web/Controllers/CitaController.cs`: delegación de consultas mediante DI.
+- `CitasApp.Web/Services/ICitaConsulta.cs`: contrato de consulta.
+- `CitasApp.Web/Services/CitaConsulta.cs`: clase extraída con la lógica de lectura y composición.
+- `CitasApp.Web/Program.cs`: registro de `ICitaConsulta` y `CitaConsulta`.
+
+La refactorización quedó registrada en el commit:
+
+```text
+8c8542b despues de aplicar refactorizacion, extract Class, DI
+```
