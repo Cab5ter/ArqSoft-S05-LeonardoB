@@ -22,6 +22,14 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Account/Denegado.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9EZW5lZ2Fkby5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9Mb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/cabster/RiderProjects/CitasApp/CitasApp.Web/Views/Cita/Crear.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2l0YS9DcmVhci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 

@@ -21,7 +21,7 @@ public class CitaController(
         CargarListas();
         return View(new Cita { Fecha = DateOnly.FromDateTime(DateTime.Today), Hora = new TimeOnly(9, 0) });
     }
-
+    
     [HttpPost]
     public IActionResult Crear(Cita cita)
     {

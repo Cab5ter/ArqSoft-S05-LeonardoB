@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "lsloWXLzcAU=",
+  "dgSpecHash": "By4uO056MIo=",
   "success": true,
   "projectFilePath": "/home/cabster/RiderProjects/CitasApp/CitasApp.Infrastructure/CitasApp.Infrastructure.csproj",
   "expectedPackageFiles": [
+    "/home/cabster/.nuget/packages/bcrypt.net-next/4.2.0/bcrypt.net-next.4.2.0.nupkg.sha512",
     "/home/cabster/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.9/microsoft.aspnetcore.app.ref.10.0.9.nupkg.sha512"
   ],
   "logs": []

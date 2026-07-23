@@ -15,7 +15,7 @@
     "Fecha": "2026-06-01",
     "Hora": "10:00",
     "Motivo": "Revisi\u00F3n de resultados",
-    "Estado": 0
+    "Estado": 1
   },
   {
     "Id": 3,
@@ -34,5 +34,14 @@
     "Hora": "10:00",
     "Motivo": "Control anual",
     "Estado": 0
+  },
+  {
+    "Id": 5,
+    "PacienteId": 1,
+    "MedicoId": 2,
+    "Fecha": "2026-06-24",
+    "Hora": "09:00",
+    "Motivo": "Niggaa",
+    "Estado": 1
   }
 ]

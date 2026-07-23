@@ -107,3 +107,5 @@
 /home/cabster/RiderProjects/CitasApp/CitasApp.Web/obj/Debug/net10.0/ref/CitasApp.Web.dll
 /home/cabster/RiderProjects/CitasApp/CitasApp.Web/bin/Debug/net10.0/CitasApp.Application.dll
 /home/cabster/RiderProjects/CitasApp/CitasApp.Web/bin/Debug/net10.0/CitasApp.Application.pdb
+/home/cabster/RiderProjects/CitasApp/CitasApp.Web/bin/Debug/net10.0/BCrypt-Net-Next.dll
+/home/cabster/RiderProjects/CitasApp/CitasApp.Web/bin/Debug/net10.0/Data/json/usuarios.json
